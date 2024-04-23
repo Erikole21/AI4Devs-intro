@@ -1,114 +1,236 @@
-// script.js
-let buttonText = 'Iniciar'; // Initially set to "Iniciar"
+// Get DOM elements
+const homeView = document.getElementById('home');
+const timerView = document.getElementById('timer');
+const countdownView = document.getElementById('countdown');
 
-const principalDiv = document.getElementById('principal-div');
-const stopwatchDiv = document.getElementById('stopwatch-div');
-const countdownDiv = document.getElementById('countdown-div');
+const timerBtn = document.getElementById('timerBtn');
+const countdownBtn = document.getElementById('countdownBtn');
+const timerBackBtn = document.getElementById('timerBackBtn');
+const countdownBackBtn = document.getElementById('countdownBackBtn');
 
-const volverStopwatchBtn = document.getElementById('volver-stopwatch');
-const volverCountdownBtn = document.getElementById('volver-countdown');
+const timerTime = document.getElementById('timerTime');
+const timerMillis = document.getElementById('timerMillis');
+const timerStartBtn = document.getElementById('timerStartBtn');
+const timerResetBtn = document.getElementById('timerResetBtn');
 
-// Función para mostrar el div principal y ocultar los demás
-function mostrarPrincipal() {
-    principalDiv.style.display = 'flex';
-    stopwatchDiv.style.display = 'none';
-    countdownDiv.style.display = 'none';
+const countdownTime = document.getElementById('countdownTime');
+const hoursInput = document.getElementById('hoursInput');
+const minutesInput = document.getElementById('minutesInput');
+const secondsInput = document.getElementById('secondsInput');
+const countdownMillis = document.getElementById('countdownMillis');
+const countdownStartBtn = document.getElementById('countdownStartBtn');
+const countdownResetBtn = document.getElementById('countdownResetBtn');
+
+let timerInterval;
+let countdownInterval;
+let timerStartTime;
+let timerElapsedTime = 0;
+let countdownStartTime;
+let countdownRemainingSeconds;
+
+// Event listeners
+timerBtn.addEventListener('click', showTimerView);
+countdownBtn.addEventListener('click', showCountdownView);
+timerBackBtn.addEventListener('click', showHomeView);
+countdownBackBtn.addEventListener('click', showHomeView);
+
+timerStartBtn.addEventListener('click', startTimer);
+timerResetBtn.addEventListener('click', resetTimer);
+
+hoursInput.addEventListener('input', validateCountdownInput);
+minutesInput.addEventListener('input', validateCountdownInput);
+secondsInput.addEventListener('input', validateCountdownInput);
+
+hoursInput.addEventListener('blur', formatCountdownInput);
+minutesInput.addEventListener('blur', formatCountdownInput);
+secondsInput.addEventListener('blur', formatCountdownInput);
+
+countdownStartBtn.addEventListener('click', startCountdown);
+countdownResetBtn.addEventListener('click', resetCountdown);
+
+// Functions
+function showHomeView() {
+	hideAllViews();
+	homeView.style.display = 'block';
 }
 
-// Función para mostrar el stopwatch y ocultar los demás
-function mostrarStopwatch() {
-    principalDiv.style.display = 'none';
-    stopwatchDiv.style.display = 'flex';
-    countdownDiv.style.display = 'none';
+function showTimerView() {
+	hideAllViews();
+	timerView.style.display = 'block';
 }
 
-// Función para mostrar el countdown y ocultar los demás
-function mostrarCountdown() {
-    principalDiv.style.display = 'none';
-    stopwatchDiv.style.display = 'none';
-    countdownDiv.style.display = 'flex';
+function showCountdownView() {
+	hideAllViews();
+	countdownView.style.display = 'block';
 }
 
-// Eventos de click para los botones
-principalDiv.addEventListener('click', (event) => {
-    isRunning = false;
-    if (event.target.classList.contains('stopwatch-btn')) {
-        mostrarStopwatch();
-    } else if (event.target.classList.contains('countdown-btn')) {
-        mostrarCountdown();
-    }
-});
-
-volverStopwatchBtn.addEventListener('click', mostrarPrincipal);
-volverCountdownBtn.addEventListener('click', mostrarPrincipal);
-
-
-const stopwatchDisplay = document.querySelector('.stopwatch-display');
-const startStopwatchBtn = document.getElementById('start-stopwatch');
-const resetStopwatchBtn = document.getElementById('reset-stopwatch');
-
-let intervalId;
-let elapsedTime = 0;
-let isRunning = false;
-
-// Función para actualizar el display del cronómetro
-function updateDisplay() {
-    const hours = Math.floor(elapsedTime / 3600000);
-    const minutes = Math.floor((elapsedTime % 3600000) / 60000);
-    const seconds = Math.floor((elapsedTime % 60000) / 1000);
-    const milliseconds = elapsedTime % 1000;
-
-    stopwatchDisplay.querySelector('.hours').textContent = hours.toString().padStart(2, '0');
-    stopwatchDisplay.querySelector('.minutes').textContent = minutes.toString().padStart(2, '0');
-    stopwatchDisplay.querySelector('.seconds').textContent = seconds.toString().padStart(2, '0');
-    stopwatchDisplay.querySelector('.milliseconds').textContent = milliseconds.toString().padStart(3, '0');
+function hideAllViews() {
+	homeView.style.display = 'none';
+	timerView.style.display = 'none';
+	countdownView.style.display = 'none';
 }
 
-// Call updateDisplay initially to show "00:00:00.000"
-updateDisplay();
+function startTimer() {
+	if (timerStartTime === undefined) {
+		timerStartTime = Date.now();
+	}
 
+	timerStartBtn.removeEventListener('click', startTimer);
+	timerStartBtn.addEventListener('click', pauseTimer);
+	timerStartBtn.textContent = '⏸️';
 
-// Función para iniciar el cronómetro
-function startStopwatch() {
-   //funcion para iniciar, pausar y reanudar el cronometro con el mismo boton startStopwatchBtn usando la variable buttonText
-    if (buttonText === 'Iniciar') {
-        if (isRunning) return; // If the stopwatch is already running, return
-        intervalId = setInterval(() => {
-            elapsedTime += 10; // Increment elapsed time by 10 milliseconds
-            updateDisplay(); // Update display with new elapsed time
-        }, 10);
-        buttonText = 'Pausar'; // Change button text to "Pausar"
-        startStopwatchBtn.textContent = buttonText; // Update button text
-        isRunning = true;
-    } else if (buttonText === 'Pausar') {
-        clearInterval(intervalId); // Clear interval to stop the stopwatch
-        buttonText = 'Reanudar'; // Change button text to "Reanudar"
-        startStopwatchBtn.textContent = buttonText; // Update button text
-        isRunning = false;
-    } else if (buttonText === 'Reanudar') {
-        intervalId = setInterval(() => {
-            elapsedTime += 10; // Increment elapsed time by 10 milliseconds
-            updateDisplay(); // Update display with new elapsed time
-        }, 10);
-        buttonText = 'Pausar'; // Change button text to "Pausar"
-        startStopwatchBtn.textContent = buttonText; // Update button text
-        isRunning = true;
-    }
+	timerInterval = setInterval(() => {
+		timerElapsedTime = Date.now() - timerStartTime;
+		updateTimerDisplay(timerElapsedTime);
+	}, 10);
 }
 
-
-// Function to reset the stopwatch
-function resetStopwatch() {
-    elapsedTime = 0;
-    updateDisplay(); // Update display to show "00:00:00.000"
-    buttonText = 'Iniciar'; // Reset button text to "Iniciar"
-    startStopwatchBtn.textContent = buttonText; // Update button text
-    startStopwatchBtn.disabled = false; // Enable button
-    isRunning = false;
-    clearInterval(intervalId);
+function pauseTimer() {
+	clearInterval(timerInterval);
+	timerStartBtn.removeEventListener('click', pauseTimer);
+	timerStartBtn.addEventListener('click', startTimer);
+	timerStartBtn.textContent = '▶️';
 }
 
-// Eventos de click para los botones
-startStopwatchBtn.addEventListener('click', startStopwatch);
-resetStopwatchBtn.addEventListener('click', resetStopwatch);
+function resetTimer() {
+	clearInterval(timerInterval);
+	timerStartTime = undefined;
+	timerElapsedTime = 0;
+	timerStartBtn.removeEventListener('click', pauseTimer);
+	timerStartBtn.addEventListener('click', startTimer);
+	timerStartBtn.textContent = '▶️';
+	updateTimerDisplay(0);
+}
 
+function updateTimerDisplay(elapsedTime) {
+	let hours = Math.floor(elapsedTime / 3600000);
+	let minutes = Math.floor((elapsedTime % 3600000) / 60000);
+	let seconds = Math.floor((elapsedTime % 60000) / 1000);
+	let millis = elapsedTime % 1000;
+
+	hours = padZero(hours);
+	minutes = padZero(minutes);
+	seconds = padZero(seconds);
+	millis = padZero(millis, 3);
+
+	timerTime.textContent = `${hours}:${minutes}:${seconds}`;
+	timerMillis.textContent = millis;
+}
+
+function validateCountdownInput(event) {
+	const input = event.target;
+	const value = input.value;
+
+	if (input === hoursInput && value > 23) {
+		input.value = '23';
+	} else if ((input === minutesInput || input === secondsInput) && value > 59) {
+		input.value = '59';
+	}
+
+	if (input.value.length === 2 && input.nextElementSibling && input.nextElementSibling.tagName === 'INPUT') {
+		input.nextElementSibling.focus();
+	}
+
+	countdownStartBtn.disabled = !(hoursInput.value || minutesInput.value || secondsInput.value);
+}
+
+function formatCountdownInput(event) {
+	const input = event.target;
+	const value = input.value;
+
+	if (value.length === 1) {
+		input.value = padZero(value);
+	}
+}
+
+function startCountdown() {
+	if (countdownStartTime === undefined) {
+		let hours = parseInt(hoursInput.value) || 0;
+		let minutes = parseInt(minutesInput.value) || 0;
+		let seconds = parseInt(secondsInput.value) || 0;
+		countdownRemainingSeconds = hours * 3600 + minutes * 60 + seconds;
+		countdownStartTime = Date.now();
+	}
+
+	countdownStartBtn.removeEventListener('click', startCountdown);
+	countdownStartBtn.addEventListener('click', pauseCountdown);
+	countdownStartBtn.textContent = '⏸️';
+
+	hoursInput.disabled = true;
+	minutesInput.disabled = true;
+	secondsInput.disabled = true;
+
+	countdownInterval = setInterval(() => {
+		let elapsedTime = Date.now() - countdownStartTime;
+		let remainingSeconds = Math.max(0, countdownRemainingSeconds - Math.floor(elapsedTime / 1000));
+
+		if (remainingSeconds <= 0) {
+			clearInterval(countdownInterval);
+			alert('Countdown finished!');
+			resetCountdown();
+			updateCountdownDisplay(0, 0);
+			return;
+		}
+
+		updateCountdownDisplay(remainingSeconds, elapsedTime);
+	}, 10);
+}
+
+function pauseCountdown() {
+	clearInterval(countdownInterval);
+	countdownStartBtn.removeEventListener('click', pauseCountdown);
+	countdownStartBtn.addEventListener('click', startCountdown);
+	countdownStartBtn.textContent = '▶️';
+}
+
+function resetCountdown() {
+	clearInterval(countdownInterval);
+	countdownStartTime = undefined;
+	countdownRemainingSeconds = undefined;
+	countdownStartBtn.removeEventListener('click', pauseCountdown);
+	countdownStartBtn.addEventListener('click', startCountdown);
+	countdownStartBtn.textContent = '▶️';
+	countdownStartBtn.disabled = true;
+
+	hoursInput.value = '00';
+	minutesInput.value = '00';
+	secondsInput.value = '00';
+	hoursInput.disabled = false;
+	minutesInput.disabled = false;
+	secondsInput.disabled = false;
+
+	updateCountdownDisplay(0, 0);
+}
+
+function updateCountdownDisplay(remainingSeconds, elapsedTime) {
+	let hours = Math.floor(remainingSeconds / 3600);
+	let minutes = Math.floor((remainingSeconds % 3600) / 60);
+	let seconds = remainingSeconds % 60;
+	let millis = elapsedTime % 1000;
+
+	hours = padZero(hours);
+	minutes = padZero(minutes);
+	seconds = padZero(seconds);
+	millis = padZero(millis, 3);
+
+	hoursInput.value = hours;
+	minutesInput.value = minutes;
+	secondsInput.value = seconds;
+	countdownMillis.textContent = millis;
+}
+
+function padZero(num, size = 2) {
+	let s = num.toString();
+	while (s.length < size) {
+		s = '0' + s;
+	}
+	return s;
+}
+
+// Set default values for countdown inputs
+hoursInput.value = '00';
+minutesInput.value = '00';
+secondsInput.value = '00';
+
+// Initial view
+showHomeView();
